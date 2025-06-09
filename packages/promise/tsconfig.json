@@ -1,0 +1,15 @@
+// packages/promise/tsconfig.json
+{
+  "compilerOptions": {
+    "target": "ES2022", // Можно взять посвежее
+    "module": "NodeNext", // <-- САМЫЙ ВАЖНЫЙ КЛЮЧ!
+    "moduleResolution": "NodeNext", // <-- И его напарник
+    "declaration": true,
+    "outDir": "./dist",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true
+  },
+  "include": ["index.ts"]
+}
