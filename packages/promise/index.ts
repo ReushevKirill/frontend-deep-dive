@@ -69,40 +69,44 @@ export class MyPromise<T> implements PromiseLike<T> {
 		onFulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | null,
 		onRejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | null
 	): MyPromise<TResult1 | TResult2> {
-    const onFulfilledHandler = 
-        typeof onFulfilled === 'function' 
-        ? onFulfilled 
-        : (value: T) => value as unknown as TResult1;
+		const onFulfilledHandler =
+			typeof onFulfilled === 'function'
+				? onFulfilled
+				: (value: T) => value as unknown as TResult1
 
-    const onRejectedHandler = 
-        typeof onRejected === 'function'
-        ? onRejected
-        : (reason: any): TResult2 => { throw reason; };
+		const onRejectedHandler =
+			typeof onRejected === 'function'
+				? onRejected
+				: (reason: any): TResult2 => {
+						throw reason
+				  }
 
 		// then всегда возвращает новый промис
 		const promise2 = new MyPromise<TResult1 | TResult2>((resolve, reject) => {
 			const scheduleFulfilled = () => {
-				// Эмулируем микротаску
-				setTimeout(() => {
+				// Меняем setTimeout на queueMicrotask
+				queueMicrotask(() => {
+					// <--- ВОТ ОНО!
 					try {
 						const x = onFulfilledHandler(this.value!)
-						// Резолвим новый промис результатом колбэка
 						resolve(x)
 					} catch (e) {
 						reject(e)
 					}
-				}, 0)
+				})
 			}
 
 			const scheduleRejected = () => {
-				setTimeout(() => {
+				// И здесь тоже
+				queueMicrotask(() => {
+					// <--- И ЗДЕСЬ!
 					try {
 						const x = onRejectedHandler(this.reason)
 						resolve(x)
 					} catch (e) {
 						reject(e)
 					}
-				}, 0)
+				})
 			}
 
 			if (this.state === PromiseState.FULFILLED) {
@@ -110,7 +114,6 @@ export class MyPromise<T> implements PromiseLike<T> {
 			} else if (this.state === PromiseState.REJECTED) {
 				scheduleRejected()
 			} else if (this.state === PromiseState.PENDING) {
-				// Если промис еще не решился, пушим хендлеры в очередь
 				this.onFulfilledCallbacks.push(scheduleFulfilled)
 				this.onRejectedCallbacks.push(scheduleRejected)
 			}
