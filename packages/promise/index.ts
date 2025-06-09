@@ -84,9 +84,7 @@ export class MyPromise<T> implements PromiseLike<T> {
 		// then всегда возвращает новый промис
 		const promise2 = new MyPromise<TResult1 | TResult2>((resolve, reject) => {
 			const scheduleFulfilled = () => {
-				// Меняем setTimeout на queueMicrotask
 				queueMicrotask(() => {
-					// <--- ВОТ ОНО!
 					try {
 						const x = onFulfilledHandler(this.value!)
 						resolve(x)
@@ -97,9 +95,7 @@ export class MyPromise<T> implements PromiseLike<T> {
 			}
 
 			const scheduleRejected = () => {
-				// И здесь тоже
 				queueMicrotask(() => {
-					// <--- И ЗДЕСЬ!
 					try {
 						const x = onRejectedHandler(this.reason)
 						resolve(x)
