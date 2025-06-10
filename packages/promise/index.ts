@@ -147,4 +147,34 @@ export class MyPromise<T> implements PromiseLike<T> {
 	public static reject<U = never>(reason?: any): MyPromise<U> {
 		return new MyPromise<U>((_, reject) => reject(reason))
 	}
+
+	public static all<T extends readonly unknown[] | []>(
+		promises: T
+	): MyPromise<{ -readonly [P in keyof T]: Awaited<T[P]> }> {
+		return new MyPromise((resolve, reject) => {
+			if (!Array.isArray(promises)) {
+				return reject(new TypeError('Argument is not iterable'))
+			}
+
+			if (promises.length === 0) {
+				return resolve([] as any)
+			}
+
+			const results = new Array(promises.length)
+			let resolvedCounter = 0
+
+			promises.forEach((item, idx) => {
+				MyPromise.resolve(item).then(
+					value => {
+						results[idx] = value
+						resolvedCounter++
+						if (resolvedCounter === promises.length) {
+							resolve(results as any)
+						}
+					},
+					reason => reject(reason)
+				)
+			})
+		})
+	}
 }
