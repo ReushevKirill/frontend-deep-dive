@@ -1,3 +1,12 @@
+export class MyAggregateError extends Error {
+	public errors: any[]
+	constructor(errors: any[], message: string) {
+		super(message)
+		this.name = 'AggregateError'
+		this.errors = errors
+	}
+}
+
 enum PromiseState {
 	PENDING = 'pending',
 	FULFILLED = 'fulfilled',
@@ -226,6 +235,36 @@ export class MyPromise<T> implements PromiseLike<T> {
 						settledCounter++
 						if (settledCounter === promises.length) {
 							resolve(results as any)
+						}
+					}
+				)
+			})
+		})
+	}
+
+	public static any<T extends readonly unknown[] | []>(
+		promises: T
+	): MyPromise<Awaited<T[number]>> {
+		return new MyPromise((resolve, reject) => {
+			if (!Array.isArray(promises)) {
+				return reject(new TypeError('Argument is not iterable'))
+			}
+
+			if (promises.length === 0) {
+				return reject(new MyAggregateError([], 'All promises were rejected'))
+			}
+
+			const errors = new Array(promises.length)
+			let rejectedCounter = 0
+
+			promises.forEach((item, idx) => {
+				MyPromise.resolve(item).then(
+					value => resolve(value as any),
+					reason => {
+						errors[idx] = reason
+						rejectedCounter++
+						if (rejectedCounter === promises.length) {
+							reject(new MyAggregateError(errors, 'All promises were rejected'))
 						}
 					}
 				)
