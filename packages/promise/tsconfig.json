@@ -1,9 +1,8 @@
-// packages/promise/tsconfig.json
 {
   "compilerOptions": {
-    "target": "ES2022", // Можно взять посвежее
-    "module": "NodeNext", // <-- САМЫЙ ВАЖНЫЙ КЛЮЧ!
-    "moduleResolution": "NodeNext", // <-- И его напарник
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "declaration": true,
     "outDir": "./dist",
     "esModuleInterop": true,
