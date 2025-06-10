@@ -1,82 +1,80 @@
 // playground/index.ts
 
 // Убедись, что импорт правильный (если мы на ESM)
-import { MyPromise } from '@my-lab/promise';
+import { MyPromise } from '@my-lab/promise'
 
-console.log('🚀 Playground started! Testing MyPromise.all...');
+console.log('🚀 Playground started! Testing MyPromise.all...')
 
 // --- Тестовые промисы-помощники ---
 
 // Промис, который успешно зарезолвится через время
 const createSuccessPromise = <T>(value: T, delay: number) =>
-  new MyPromise<T>(resolve => setTimeout(() => resolve(value), delay));
+	new MyPromise<T>(resolve => setTimeout(() => resolve(value), delay))
 
 // Промис, который упадет через время
 const createFailurePromise = <T>(reason: T, delay: number) =>
-  new MyPromise<never>((_, reject) => setTimeout(() => reject(reason), delay));
+	new MyPromise<never>((_, reject) => setTimeout(() => reject(reason), delay))
 
+// Добавляем в playground/index.ts
 
-// --- Кейс 1: Все промисы успешны ---
-console.log('\n--- Case 1: All promises succeed ---');
+// --- Кейс 5: Тестируем `race` (успешный побеждает) ---
+console.log('\n--- Case 5: Race succeeds ---')
 
-const case1Promises = [
-  createSuccessPromise('✅ First', 1000),
-  createSuccessPromise('✅ Second', 500), // Этот выполнится раньше
-  42, // Простое значение
-  Promise.resolve('✅ Native Promise'), // Нативный промис для проверки совместимости
-];
+const case5Promises = [
+	createSuccessPromise('❌ Slower', 1000),
+	createSuccessPromise('✅ Faster', 300), // Этот должен победить
+	createFailurePromise('❌ Slow fail', 1200),
+]
 
-MyPromise.all(case1Promises)
-  .then(results => {
-    console.log('Case 1 Success:', results);
-    // Ожидаем: ['✅ First', '✅ Second', 42, '✅ Native Promise']
-    // Порядок должен сохраниться!
-  })
-  .catch(err => {
-    console.error('Case 1 Failed (unexpected):', err);
-  });
+MyPromise.race(case5Promises)
+	.then(winner => {
+		console.log('Case 5 Winner:', winner)
+		// Ожидаем: '✅ Faster'
+	})
+	.catch(err => {
+		console.error('Case 5 Failed (unexpected):', err)
+	})
 
+// --- Кейс 6: Тестируем `race` (ошибка побеждает) ---
+console.log('\n--- Case 6: Race fails ---')
 
-// --- Кейс 2: Один из промисов падает ---
-console.log('\n--- Case 2: One promise fails ---');
+const case6Promises = [
+	createSuccessPromise('❌ Slow success', 800),
+	createFailurePromise('✅ Fast fail!', 200), // Этот должен победить
+]
 
-const case2Promises = [
-  createSuccessPromise('✅ Success 1', 800),
-  createFailurePromise('❌ ERROR!', 400), // Этот упадет раньше, чем первый выполнится
-  createSuccessPromise('✅ Success 2', 1200), // Этот даже не успеет зарезолвиться
-];
+MyPromise.race(case6Promises)
+	.then(winner => {
+		console.log('Case 6 Winner (unexpected):', winner)
+	})
+	.catch(err => {
+		console.error('Case 6 Failed:', err)
+		// Ожидаем: '✅ Fast fail!'
+	})
 
-MyPromise.all(case2Promises)
-  .then(results => {
-    console.log('Case 2 Success (unexpected):', results);
-  })
-  .catch(err => {
-    console.error('Case 2 Failed:', err);
-    // Ожидаем: '❌ ERROR!'
-  });
+// Добавляем в playground/index.ts
 
+// --- Кейс 7: Тестируем `allSettled` ---
+console.log('\n--- Case 7: All Settled ---')
 
-// --- Кейс 3: Пустой массив ---
-console.log('\n--- Case 3: Empty array ---');
+const case7Promises = [
+	createSuccessPromise('✅ Success', 500),
+	createFailurePromise('❌ Failure', 300),
+	42, // Простое значение
+]
 
-MyPromise.all([])
-  .then(results => {
-    console.log('Case 3 Success:', results);
-    // Ожидаем: []
-  })
-  .catch(err => {
-    console.error('Case 3 Failed (unexpected):', err);
-  });
-
-
-// --- Кейс 4: Массив только со значениями (не промисами) ---
-console.log('\n--- Case 4: Array of values only ---');
-
-MyPromise.all([1, 'hello', true])
-  .then(results => {
-    console.log('Case 4 Success:', results);
-    // Ожидаем: [1, 'hello', true]
-  })
-  .catch(err => {
-    console.error('Case 4 Failed (unexpected):', err);
-  });
+MyPromise.allSettled(case7Promises)
+	.then(results => {
+		console.log('Case 7 Results:', JSON.stringify(results, null, 2))
+		/* Ожидаем примерно такой вывод:
+    [
+      { "status": "fulfilled", "value": "✅ Success" },
+      { "status": "rejected", "reason": "❌ Failure" },
+      { "status": "fulfilled", "value": 42 }
+    ]
+    */
+	})
+	.catch(err => {
+		// Этот блок никогда не должен выполниться
+		console.error('Case 7 Failed (unexpected):', err)
+	})

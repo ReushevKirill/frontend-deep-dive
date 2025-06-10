@@ -177,4 +177,59 @@ export class MyPromise<T> implements PromiseLike<T> {
 			})
 		})
 	}
+
+	public static race<T extends readonly unknown[] | []>(
+		promises: T
+	): MyPromise<Awaited<T[number]>> {
+		return new MyPromise((resolve, reject) => {
+			if (!Array.isArray(promises)) {
+				return reject(new TypeError('Argument is not iterable'))
+			}
+
+			promises.forEach(item => {
+				MyPromise.resolve(item).then(
+					value => resolve(value as any),
+					reason => reject(reason)
+				)
+			})
+		})
+	}
+
+	public static allSettled<T extends readonly unknown[] | []>(
+		promises: T
+	): MyPromise<{
+		-readonly [P in keyof T]: PromiseSettledResult<Awaited<T[P]>>
+	}> {
+		return new MyPromise((resolve, reject) => {
+			if (!Array.isArray(promises)) {
+				return reject(new TypeError('Argument is not iterable'))
+			}
+
+			if (promises.length === 0) {
+				return resolve([] as any)
+			}
+
+			const results: PromiseSettledResult<any>[] = new Array(promises.length)
+			let settledCounter = 0
+
+			promises.forEach((item, idx) => {
+				MyPromise.resolve(item).then(
+					value => {
+						results[idx] = { status: 'fulfilled', value: value }
+						settledCounter++
+						if (settledCounter === promises.length) {
+							resolve(results as any)
+						}
+					},
+					reason => {
+						results[idx] = { status: 'rejected', reason: reason }
+						settledCounter++
+						if (settledCounter === promises.length) {
+							resolve(results as any)
+						}
+					}
+				)
+			})
+		})
+	}
 }
