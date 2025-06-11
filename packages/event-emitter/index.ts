@@ -1,43 +1,38 @@
 type Listener = (...args: any[]) => void
 type Events = {
-  [key: string]: Listener[]
+	[key: string]: Listener[]
 }
 
 class EventEmitter {
-  private events: Events = {}
+	private events: Events = {}
 
-  private unsubscribeHandler = (eventName: string, callback: () => any) => {
-    this.events[eventName] = this.events[eventName].filter(c => c !== callback)
-  }
+	on(eventName: string, callback: Listener) {
+		if (!this.events[eventName]) {
+			this.events[eventName] = []
+		}
 
-  on<T = unknown>(eventName: string, callback: () => T) {
-    if (!this.events[eventName]) {
-      this.events[eventName] = []
-      this.events[eventName].push(callback)
-    }
+		this.events[eventName].push(callback)
 
-    return () => {
-      this.unsubscribeHandler(eventName, callback)
-    }
-  }
+		return () => this.off(eventName, callback)
+	}
 
-  off(eventName: string, callback: () => any) {
-    if (!this.events[eventName]) return
-    this.unsubscribeHandler(eventName, callback)
-  }
+	off(eventName: string, callback: Listener) {
+		if (!this.events[eventName]) return
+		this.events[eventName] = this.events[eventName].filter(c => c !== callback)
+	}
 
-  emit<T = (unknown | unknown[])>(eventName: string, ...args: T[]) {
-    if (!this.events[eventName]) return
-    const copyEvents = [...this.events[eventName]]
-    copyEvents.forEach(callback => callback(...args))
-  }
+	emit(eventName: string, ...args: any[]) {
+		if (!this.events[eventName]) return
+		const copyEvents = [...this.events[eventName]]
+		copyEvents.forEach(callback => callback(...args))
+	}
 
-  once(eventName: string, callback: () => any) {
-    const onceWrapper = () => {
-      this.off(eventName, onceWrapper)
-      callback()
-    }
+	once(eventName: string, callback: Listener) {
+		const onceWrapper = (...args: any[]) => {
+			this.off(eventName, onceWrapper)
+			callback(...args)
+		}
 
-    this.on(eventName, onceWrapper)
-  }
+		this.on(eventName, onceWrapper)
+	}
 }
