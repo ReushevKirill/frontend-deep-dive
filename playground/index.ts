@@ -9,7 +9,7 @@ const onceBtn = document.getElementById('onceBtn')!;
 const logDiv = document.getElementById('log')!;
 
 // Создаем экземпляр нашего эмиттера
-const emitter = new EventEmitter();
+const emitter = EventEmitter.getInstance();
 
 const log = (message: string) => {
   logDiv.innerHTML += `<div>${new Date().toLocaleTimeString()}: ${message}</div>`;

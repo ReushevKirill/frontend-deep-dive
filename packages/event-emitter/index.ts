@@ -1,71 +1,80 @@
-export type Listener = (...args: any[]) => void;
+export type Listener = (...args: any[]) => void
 export type Events = {
-  [eventName: string]: Listener[];
-};
+	[eventName: string]: Listener[]
+}
 
 export class EventEmitter {
-  protected events: Events = {};
+	protected events: Events = {}
+	private static instance: EventEmitter
 
-  /**
-   * Подписаться на событие.
-   * @param eventName Имя события.
-   * @param callback Колбэк.
-   * @returns Функция для отписки.
-   */
-  public on(eventName: string, callback: Listener): () => void {
-    if (!this.events[eventName]) {
-      this.events[eventName] = [];
-    }
+	private constructor() {}
 
-    this.events[eventName].push(callback);
+	public static getInstance(): Omit<EventEmitter, 'events'> {
+		if (!EventEmitter.instance) {
+			EventEmitter.instance = new EventEmitter()
+		}
 
-    return () => this.off(eventName, callback);
-  }
+		return Object.freeze(EventEmitter.instance)
+	}
 
-  /**
-   * Отписаться от события.
-   * @param eventName Имя события.
-   * @param callback Колбэк, который нужно удалить.
-   */
-  public off(eventName: string, callback: Listener): void {
-    const listeners = this.events[eventName];
-    if (!listeners) {
-      return;
-    }
+	/**
+	 * Подписаться на событие.
+	 * @param eventName Имя события.
+	 * @param callback Колбэк.
+	 * @returns Функция для отписки.
+	 */
+	public on(eventName: string, callback: Listener): () => void {
+		if (!this.events[eventName]) {
+			this.events[eventName] = []
+		}
 
-    this.events[eventName] = listeners.filter(
-      (listener) => listener !== callback
-    );
-  }
+		this.events[eventName].push(callback)
 
-  /**
-   * Сгенерировать событие.
-   * @param eventName Имя события.
-   * @param args Аргументы для передачи в колбэки.
-   */
-  public emit(eventName: string, ...args: any[]): void {
-    const listeners = this.events[eventName];
-    if (!listeners) {
-      return;
-    }
+		return () => this.off(eventName, callback)
+	}
 
-    // Работаем с копией, чтобы отписка внутри колбэка не ломала цикл
-    [...listeners].forEach((callback) => {
-      callback(...args);
-    });
-  }
+	/**
+	 * Отписаться от события.
+	 * @param eventName Имя события.
+	 * @param callback Колбэк, который нужно удалить.
+	 */
+	public off(eventName: string, callback: Listener): void {
+		const listeners = this.events[eventName]
+		if (!listeners) {
+			return
+		}
 
-  /**
-   * Подписаться на событие только один раз.
-   * @param eventName Имя события.
-   * @param callback Колбэк.
-   */
-  public once(eventName: string, callback: Listener): void {
-    const onceWrapper = (...args: any[]) => {
-      this.off(eventName, onceWrapper);
-      callback(...args);
-    };
+		this.events[eventName] = listeners.filter(listener => listener !== callback)
+	}
 
-    this.on(eventName, onceWrapper);
-  }
+	/**
+	 * Сгенерировать событие.
+	 * @param eventName Имя события.
+	 * @param args Аргументы для передачи в колбэки.
+	 */
+	public emit(eventName: string, ...args: any[]): void {
+		const listeners = this.events[eventName]
+		if (!listeners) {
+			return
+		}
+
+		// Работаем с копией, чтобы отписка внутри колбэка не ломала цикл
+		;[...listeners].forEach(callback => {
+			callback(...args)
+		})
+	}
+
+	/**
+	 * Подписаться на событие только один раз.
+	 * @param eventName Имя события.
+	 * @param callback Колбэк.
+	 */
+	public once(eventName: string, callback: Listener): void {
+		const onceWrapper = (...args: any[]) => {
+			this.off(eventName, onceWrapper)
+			callback(...args)
+		}
+
+		this.on(eventName, onceWrapper)
+	}
 }
