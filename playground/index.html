@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EventEmitter Playground</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    button { margin: 5px; padding: 10px; cursor: pointer; }
+    #log { border: 1px solid #ccc; padding: 10px; min-height: 100px; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h1>EventEmitter Playground</h1>
+  
+  <button id="onBtn">Подписаться на 'test-event'</button>
+  <button id="offBtn" disabled>Отписаться от 'test-event'</button>
+  <button id="emitBtn">Эмит 'test-event' с рандомным числом</button>
+  <button id="onceBtn">Подписаться на ОДИН 'test-event'</button>
+
+  <h2>Лог событий:</h2>
+  <div id="log"></div>
+
+  <!-- Vite сам подключит наш TS-скрипт -->
+  <script type="module" src="/index.ts"></script>
+</body>
+</html>

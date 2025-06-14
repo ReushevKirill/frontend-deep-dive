@@ -1,38 +1,71 @@
-type Listener = (...args: any[]) => void
-type Events = {
-	[key: string]: Listener[]
-}
+export type Listener = (...args: any[]) => void;
+export type Events = {
+  [eventName: string]: Listener[];
+};
 
-class EventEmitter {
-	private events: Events = {}
+export class EventEmitter {
+  protected events: Events = {};
 
-	on(eventName: string, callback: Listener) {
-		if (!this.events[eventName]) {
-			this.events[eventName] = []
-		}
+  /**
+   * Подписаться на событие.
+   * @param eventName Имя события.
+   * @param callback Колбэк.
+   * @returns Функция для отписки.
+   */
+  public on(eventName: string, callback: Listener): () => void {
+    if (!this.events[eventName]) {
+      this.events[eventName] = [];
+    }
 
-		this.events[eventName].push(callback)
+    this.events[eventName].push(callback);
 
-		return () => this.off(eventName, callback)
-	}
+    return () => this.off(eventName, callback);
+  }
 
-	off(eventName: string, callback: Listener) {
-		if (!this.events[eventName]) return
-		this.events[eventName] = this.events[eventName].filter(c => c !== callback)
-	}
+  /**
+   * Отписаться от события.
+   * @param eventName Имя события.
+   * @param callback Колбэк, который нужно удалить.
+   */
+  public off(eventName: string, callback: Listener): void {
+    const listeners = this.events[eventName];
+    if (!listeners) {
+      return;
+    }
 
-	emit(eventName: string, ...args: any[]) {
-		if (!this.events[eventName]) return
-		const copyEvents = [...this.events[eventName]]
-		copyEvents.forEach(callback => callback(...args))
-	}
+    this.events[eventName] = listeners.filter(
+      (listener) => listener !== callback
+    );
+  }
 
-	once(eventName: string, callback: Listener) {
-		const onceWrapper = (...args: any[]) => {
-			this.off(eventName, onceWrapper)
-			callback(...args)
-		}
+  /**
+   * Сгенерировать событие.
+   * @param eventName Имя события.
+   * @param args Аргументы для передачи в колбэки.
+   */
+  public emit(eventName: string, ...args: any[]): void {
+    const listeners = this.events[eventName];
+    if (!listeners) {
+      return;
+    }
 
-		this.on(eventName, onceWrapper)
-	}
+    // Работаем с копией, чтобы отписка внутри колбэка не ломала цикл
+    [...listeners].forEach((callback) => {
+      callback(...args);
+    });
+  }
+
+  /**
+   * Подписаться на событие только один раз.
+   * @param eventName Имя события.
+   * @param callback Колбэк.
+   */
+  public once(eventName: string, callback: Listener): void {
+    const onceWrapper = (...args: any[]) => {
+      this.off(eventName, onceWrapper);
+      callback(...args);
+    };
+
+    this.on(eventName, onceWrapper);
+  }
 }

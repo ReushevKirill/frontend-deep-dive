@@ -11,7 +11,9 @@
 	"main": "index.js",
 	"scripts": {
 		"build:promise": "npm run build -w @my-lab/promise",
-		"dev:playground": "tsx playground/index.ts"
+		"build:emitter": "npm run build -w @my-lab/event-emitter",
+		"dev:console": "tsx playground/index.ts",
+		"dev:playground": "vite playground"
 	},
 	"keywords": [],
 	"author": "",
@@ -19,6 +21,7 @@
 	"devDependencies": {
 		"ts-node": "^10.9.2",
 		"tsx": "^4.19.4",
-		"typescript": "^5.8.3"
+		"typescript": "^5.8.3",
+		"vite": "^6.3.5"
 	}
 }
