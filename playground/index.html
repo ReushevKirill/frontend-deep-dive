@@ -3,25 +3,35 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>EventEmitter Playground</title>
+  <title>Debounce & Throttle Playground</title>
   <style>
-    body { font-family: sans-serif; padding: 20px; }
-    button { margin: 5px; padding: 10px; cursor: pointer; }
-    #log { border: 1px solid #ccc; padding: 10px; min-height: 100px; margin-top: 20px; }
+    body { font-family: sans-serif; display: flex; gap: 20px; padding: 20px; }
+    .container { flex: 1; border: 2px solid #333; height: 400px; padding: 10px; }
+    .container h2 { margin-top: 0; }
+    .counter { font-size: 2rem; font-weight: bold; color: #007bff; }
+    .info { margin-top: 10px; font-style: italic; color: #555; }
   </style>
 </head>
 <body>
-  <h1>EventEmitter Playground</h1>
-  
-  <button id="onBtn">Подписаться на 'test-event'</button>
-  <button id="offBtn" disabled>Отписаться от 'test-event'</button>
-  <button id="emitBtn">Эмит 'test-event' с рандомным числом</button>
-  <button id="onceBtn">Подписаться на ОДИН 'test-event'</button>
 
-  <h2>Лог событий:</h2>
-  <div id="log"></div>
+  <div class="container" id="default-container">
+    <h2>Обычное событие (mousemove)</h2>
+    <p>Срабатываний: <span id="default-counter" class="counter">0</span></p>
+    <p class="info">Подвигайте мышью здесь. Счетчик будет расти очень быстро.</p>
+  </div>
 
-  <!-- Vite сам подключит наш TS-скрипт -->
+  <div class="container" id="debounce-container">
+    <h2>Debounce (задержка 500ms)</h2>
+    <p>Срабатываний: <span id="debounce-counter" class="counter">0</span></p>
+    <p class="info">Сработает только когда вы ОСТАНОВИТЕ мышь на полсекунды.</p>
+  </div>
+
+  <div class="container" id="throttle-container">
+    <h2>Throttle (интервал 500ms)</h2>
+    <p>Срабатываний: <span id="throttle-counter" class="counter">0</span></p>
+    <p class="info">Будет срабатывать НЕ ЧАЩЕ, чем раз в полсекунды, как бы вы ни двигали мышью.</p>
+  </div>
+
   <script type="module" src="/index.ts"></script>
 </body>
 </html>

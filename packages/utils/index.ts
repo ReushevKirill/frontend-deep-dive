@@ -38,7 +38,7 @@ export function throttle<T extends (...args: any[]) => any>(
     setTimeout(() => {
       isInCooldown = false;
       if (savedArgs) {
-        wrapper.apply(savedThis, savedArgs);
+        wrapper.apply(savedThis!, savedArgs);
         savedArgs = savedThis = null;
       }
     }, delay);

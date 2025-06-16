@@ -12,6 +12,7 @@
 	"scripts": {
 		"build:promise": "npm run build -w @my-lab/promise",
 		"build:emitter": "npm run build -w @my-lab/event-emitter",
+		"build:utils": "npm run build -w @my-lab/utils",
 		"dev:console": "tsx playground/index.ts",
 		"dev:playground": "vite playground"
 	},

@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@my-lab/promise": "^1.0.0"
+    "@my-lab/promise": "^1.0.0",
+    "@my-lab/utils": "^1.0.0"
   }
 }
