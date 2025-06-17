@@ -5,17 +5,8 @@ export type Events = {
 
 export class EventEmitter {
 	protected events: Events = {}
-	private static instance: EventEmitter
 
-	private constructor() {}
-
-	public static getInstance(): Omit<EventEmitter, 'events'> {
-		if (!EventEmitter.instance) {
-			EventEmitter.instance = new EventEmitter()
-		}
-
-		return Object.freeze(EventEmitter.instance)
-	}
+	constructor() {}
 
 	/**
 	 * Подписаться на событие.
@@ -76,5 +67,21 @@ export class EventEmitter {
 		}
 
 		this.on(eventName, onceWrapper)
+	}
+}
+
+export class GlobalEventEmitter extends EventEmitter {
+	private static instance: EventEmitter
+
+	private constructor() {
+		super()
+	}
+
+	public static getInstance(): Omit<GlobalEventEmitter, 'events'> {
+		if (!GlobalEventEmitter.instance) {
+			GlobalEventEmitter.instance = new GlobalEventEmitter()
+		}
+
+		return Object.freeze(GlobalEventEmitter.instance)
 	}
 }

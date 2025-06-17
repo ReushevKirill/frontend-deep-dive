@@ -1,36 +1,36 @@
+<!-- playground/index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Debounce & Throttle Playground</title>
+  <title>Q Playground</title>
   <style>
-    body { font-family: sans-serif; display: flex; gap: 20px; padding: 20px; }
-    .container { flex: 1; border: 2px solid #333; height: 400px; padding: 10px; }
-    .container h2 { margin-top: 0; }
-    .counter { font-size: 2rem; font-weight: bold; color: #007bff; }
-    .info { margin-top: 10px; font-style: italic; color: #555; }
+    body { font-family: sans-serif; padding: 20px; }
+    .container { padding: 15px; }
+    .box { padding: 20px; margin: 10px; border: 1px solid #ccc; cursor: pointer; transition: all 0.2s; }
+    .highlight { font-weight: bold; }
+    .clicked { background-color: #e0f7fa !important; transform: scale(1.02); }
+    button { margin: 10px 0; padding: 10px; cursor: pointer; }
+    #log-div { border: 1px solid #eee; padding: 10px; min-height: 100px; margin-top: 20px; background: #f9f9f9; }
+    #data-store { display: none; }
   </style>
 </head>
 <body>
-
-  <div class="container" id="default-container">
-    <h2>Обычное событие (mousemove)</h2>
-    <p>Срабатываний: <span id="default-counter" class="counter">0</span></p>
-    <p class="info">Подвигайте мышью здесь. Счетчик будет расти очень быстро.</p>
+  <div class="container">
+    <h2>My Q Playground</h2>
+    <div class="box" id="box1">Box 1</div>
+    <div class="box" id="box2">Box 2</div>
+    <div class="box" id="box3">Box 3</div>
   </div>
 
-  <div class="container" id="debounce-container">
-    <h2>Debounce (задержка 500ms)</h2>
-    <p>Срабатываний: <span id="debounce-counter" class="counter">0</span></p>
-    <p class="info">Сработает только когда вы ОСТАНОВИТЕ мышь на полсекунды.</p>
-  </div>
+  <button id="actionBtn">Отписаться от кликов по боксам</button>
 
-  <div class="container" id="throttle-container">
-    <h2>Throttle (интервал 500ms)</h2>
-    <p>Срабатываний: <span id="throttle-counter" class="counter">0</span></p>
-    <p class="info">Будет срабатывать НЕ ЧАЩЕ, чем раз в полсекунды, как бы вы ни двигали мышью.</p>
-  </div>
+  <h2>Лог событий:</h2>
+  <div id="log-div"></div>
+  
+  <!-- Пустой div для хранения кастомных событий -->
+  <div id="data-store"></div>
 
   <script type="module" src="/index.ts"></script>
 </body>
