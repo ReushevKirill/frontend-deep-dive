@@ -43,6 +43,55 @@ export function throttle<T extends (...args: any[]) => any>(
 	}
 }
 
-export function cloneDeep(value: unknown) {
-	// TODO: cloneDeep
+function isPrimitive(value: unknown) {
+  return typeof value !== 'object' && typeof value !== "function"
+}
+
+function isObject(value: unknown): value is Object {
+  return typeof value === 'object' && typeof value !== 'function'
+}
+
+function isComplexObject(value: any) {
+  return typeof value === 'function' || 'constructor' in value || (value as any) instanceof Element
+}
+
+function cloneDeepInner<T = unknown>(value: T, visited: Set<T>) {
+  if (visited.has(value)) {
+    return
+  }
+
+	if (isPrimitive(value) || isComplexObject(value)) {
+		return value
+	}
+
+	if (Array.isArray(value)) {
+    const copy: unknown[] = []
+
+    value.forEach(v => {
+      let copiedValue = cloneDeep(v)
+      copy.push(copiedValue)
+    })
+
+    return copy
+  }
+
+  if (isObject(value)) {
+    const copy = {} as Record<string, any>
+
+    Object.entries(value).forEach(([k, v]) => {
+      if (v === value) {
+        visited.add(v)
+        return
+      }
+
+      let copiedValue = cloneDeep(v)
+      copy[k] = copiedValue
+    })
+
+    return copy
+  }
+}
+
+function cloneDeep<T = unknown>(value: T) {
+  return cloneDeepInner(value, new Set())
 }

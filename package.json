@@ -15,7 +15,7 @@
 		"build:utils": "npm run build -w @my-lab/utils",
 		"build:q": "npm run build -w @my-lab/query-selector",
 		"dev:console": "tsx playground/index.ts",
-		"dev:playground": "vite playground"
+		"dev": "vite playground"
 	},
 	"keywords": [],
 	"author": "",
