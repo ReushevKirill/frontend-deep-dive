@@ -81,11 +81,9 @@ function cloneDeepInner<T = unknown>(value: T, visited: Set<T>) {
     Object.entries(value).forEach(([k, v]) => {
       if (v === value) {
         visited.add(v)
-        copy[k] = v
-      } else {
-        let copiedValue = cloneDeep(v)
-        copy[k] = copiedValue
-      }
+      } 
+      let copiedValue = cloneDeep(v)
+      copy[k] = copiedValue
     })
 
     return copy
