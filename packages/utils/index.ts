@@ -43,53 +43,58 @@ export function throttle<T extends (...args: any[]) => any>(
 	}
 }
 
-function isPrimitive(value: unknown) {
-  return typeof value !== 'object' && typeof value !== "function"
+// Хелпер для проверки, является ли значение "клонируемым" объектом или массивом
+function isCloneable(value: unknown): value is Record<string, any> | any[] {
+  // Должен быть объектом, не null и не функцией
+  return typeof value === 'object' && value !== null;
 }
 
-function isObject(value: unknown): value is Object {
-  return typeof value === 'object' && typeof value !== 'function'
-}
-
-function isComplexObject(value: any) {
-  return typeof value === 'function' || 'constructor' in value || (value as any) instanceof Element
-}
-
-function cloneDeepInner<T = unknown>(value: T, visited: Set<T>) {
+function cloneDeepInner<T>(value: T, visited: Map<object, T>): T {
+  // 1. Если значение не является объектом (примитив, функция), просто возвращаем его.
+  if (!isCloneable(value)) {
+    return value;
+  }
+  
+  // 2. Проверяем, не сталкивались ли мы уже с этим объектом/массивом
   if (visited.has(value)) {
-    return
+    // Если да, возвращаем уже созданную для него копию, чтобы замкнуть цикл.
+    return visited.get(value)!;
   }
 
-	if (isPrimitive(value) || isComplexObject(value)) {
-		return value
-	}
-
-	if (Array.isArray(value)) {
-    const copy: unknown[] = []
-
-    value.forEach(v => {
-      let copiedValue = cloneDeep(v)
-      copy.push(copiedValue)
-    })
-
-    return copy
+  // 3. Обрабатываем массивы
+  if (Array.isArray(value)) {
+    // Создаем пустую копию и сразу же сохраняем ее в Map.
+    // Это важно сделать ДО рекурсивных вызовов.
+    const copy: any[] = [];
+    visited.set(value, copy as T);
+    
+    // Рекурсивно копируем каждый элемент
+    for (const item of value) {
+      copy.push(cloneDeepInner(item, visited));
+    }
+    
+    return copy as T;
   }
 
-  if (isObject(value)) {
-    const copy = {} as Record<string, any>
+  // 4. Обрабатываем объекты (здесь value уже точно объект)
+  const copy: Record<string, any> = {};
+  // Сохраняем ссылку на пустую копию ДО рекурсии
+  visited.set(value, copy as T);
 
-    Object.entries(value).forEach(([k, v]) => {
-      if (v === value) {
-        visited.add(v)
-      } 
-      let copiedValue = cloneDeep(v)
-      copy[k] = copiedValue
-    })
-
-    return copy
+  // Рекурсивно копируем каждое свойство
+  for (const key of Object.keys(value)) {
+    copy[key] = cloneDeepInner((value as any)[key], visited);
   }
+
+  return copy as T;
 }
 
-function cloneDeep<T = unknown>(value: T) {
-  return cloneDeepInner(value, new Set())
+/**
+ * Создает глубокую копию значения.
+ * @param value Значение для копирования.
+ * @returns Глубокая копия значения.
+ */
+export function cloneDeep<T>(value: T): T {
+  // Для управления циклическими ссылками используем Map
+  return cloneDeepInner(value, new Map());
 }
