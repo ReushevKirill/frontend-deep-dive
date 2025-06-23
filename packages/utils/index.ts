@@ -98,3 +98,45 @@ export function cloneDeep<T>(value: T): T {
   // Для управления циклическими ссылками используем Map
   return cloneDeepInner(value, new Map());
 }
+
+function get<T extends Record<string, any>, V>(obj: T, path: string | string[], defaultValue: V): V {
+  let keys;
+
+  if (Array.isArray(path)) {
+    keys = path
+  } else {
+    let pattern = /\[|\]/g;
+    let pathWithPattern = path.replace(pattern, '.').split(".").filter(s => s !== "")
+    keys = pathWithPattern
+  }
+
+  let value: V = defaultValue
+  let objValue = obj
+  if (keys.length) {
+    keys.forEach((key, idx) => {
+      if (objValue[key]) {
+        if (idx === keys.length - 1) {
+          value = objValue[key]
+        } else if (objValue[key] instanceof Object) {
+          objValue = objValue[key]
+        }
+      }
+    })
+  }
+
+  return value
+}
+
+const user = {
+  id: 1,
+  details: {
+    name: 'John Doe',
+    address: {
+      city: 'New York',
+      coords: [10, 20]
+    }
+  },
+  posts: null
+};
+
+console.log(get(user, 'details.address.coords[2]', 'No coords'))
