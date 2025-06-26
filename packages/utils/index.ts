@@ -99,44 +99,38 @@ export function cloneDeep<T>(value: T): T {
   return cloneDeepInner(value, new Map());
 }
 
-function get<T extends Record<string, any>, V>(obj: T, path: string | string[], defaultValue: V): V {
-  let keys;
+/**
+ * Безопасно извлекает вложенное значение из объекта по строковому или массивному пути.
+ * @param obj Исходный объект.
+ * @param path Путь к значению (например, 'a.b[0].c' или ['a', 'b', '0', 'c']).
+ * @param defaultValue Значение, которое вернется, если путь не найден.
+ * @returns Найденное значение или defaultValue.
+ */
+export function get<T extends object, V>(
+  obj: T,
+  path: string | string[],
+  defaultValue: V
+): V | any {
+  // Парсинг пути
+  const keys = Array.isArray(path)
+    ? path
+    : path.replace(/\[(\d+)\]/g, '.$1').split('.').filter(Boolean);
+    // Regex, чтобы 'a[0]' превращалось в 'a.0'
+    
+  let current: any = obj;
 
-  if (Array.isArray(path)) {
-    keys = path
-  } else {
-    let pattern = /\[|\]/g;
-    let pathWithPattern = path.replace(pattern, '.').split(".").filter(s => s !== "")
-    keys = pathWithPattern
-  }
-
-  let value: V = defaultValue
-  let objValue = obj
-  if (keys.length) {
-    keys.forEach((key, idx) => {
-      if (objValue[key]) {
-        if (idx === keys.length - 1) {
-          value = objValue[key]
-        } else if (objValue[key] instanceof Object) {
-          objValue = objValue[key]
-        }
-      }
-    })
-  }
-
-  return value
-}
-
-const user = {
-  id: 1,
-  details: {
-    name: 'John Doe',
-    address: {
-      city: 'New York',
-      coords: [10, 20]
+  for (const key of keys) {
+    // Если `current` не объект (например, null или undefined), путь обрывается.
+    if (current === null || typeof current !== 'object') {
+      return defaultValue;
     }
-  },
-  posts: null
-};
+    
+    // Делаем следующий шаг вглубь
+    current = current[key];
+  }
 
-console.log(get(user, 'details.address.coords[2]', 'No coords'))
+  // 3. Финальная проверка
+  // Если мы прошли весь путь, но итоговое значение `undefined`,
+  // все равно возвращаем `defaultValue`.
+  return current === undefined ? defaultValue : current;
+}
